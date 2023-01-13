@@ -42,8 +42,11 @@ rmsf_data = process_rmsf(files)
 protein_rmsf_avg = rmsf_data.iloc[1,1:-1]
 protein_rmsf_stdev = rmsf_data.iloc[2,1:-1]
 
-# t33a residues hard coded in
-resi = np.arange(885,1088)
+# t33a residues hard coded in, modified to cope with apo runs
+if snakemake.params.with_pep == "no":
+    resi = np.arange(883,1088)
+else:
+    resi = np.arange(885,1088)
 print(len(resi))
 
 fig, ax = plt.subplots(figsize=(8,4), constrained_layout=True)
