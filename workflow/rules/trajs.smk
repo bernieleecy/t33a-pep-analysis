@@ -30,7 +30,7 @@ rule make_ndx:
         elif samples.loc[wildcards.folder, "peptide"] == "no":
             shell(
                 'echo -e "{params.grp_1}\n{params.apo_2}\n{params.apo_3}\n \
-                        name 21 r_3-207\n name 22 r_3-207_&_Backbone\n q "'
+                name 21 r_3-207\n name 22 r_3-207_&_Backbone\n q "'
                 "| gmx make_ndx -f {input} -o {output}"
             )
 
