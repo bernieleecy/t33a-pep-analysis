@@ -83,7 +83,5 @@ rule plot_t33a_rmsf:
         get_rmsf_xvgs,
     output:
         "results/{folder}/protein/t33a_rmsf.png",
-    params:
-        with_pep=lambda wildcards: samples.loc[wildcards.folder, "peptide"],
     script:
-        "../scripts/plot_t33a_rmsf.py"
+        "../scripts/plot_protein_rmsf.py"
