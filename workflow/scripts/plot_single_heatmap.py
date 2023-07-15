@@ -1,4 +1,4 @@
-# For cMD runs, 100 ns
+# For cMD runs, for distances only, now modified to take variable length simulations
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ plt.style.use(snakemake.config["mpl_style"])
 sns.set_palette("colorblind")
 
 
-def gen_df(file, n_runs=3):
+def gen_df(file, n_runs=3, dist=True):
     """Makes the df for the heatmap from a xvg file
 
     Args:
@@ -22,23 +22,26 @@ def gen_df(file, n_runs=3):
         df (pandas DataFrame): DataFrame for heatmap
     """
 
-    dist_data = {}
+    gmx_data = {}
 
     with open(file, "r") as f:
         for line in f:
             if not line.startswith(("@", "#")):
                 data = line.strip().split()
                 time = float(data[0]) / 1000
-                dist = float(data[1]) * 10  # convert to angstrom
+                if dist:
+                    gmx_val = float(data[1]) * 10  # convert to angstrom
+                else:
+                    gmx_val = float(data[1])
 
                 # values need to be initialised as a list ([dist])
-                if time not in dist_data:
-                    dist_data[time] = [dist]
+                if time not in gmx_data:
+                    gmx_data[time] = [gmx_val]
                 # subsequent values are then appended
                 else:
-                    dist_data[time].append(dist)
+                    gmx_data[time].append(gmx_val)
 
-    df = pd.DataFrame.from_dict(dist_data)
+    df = pd.DataFrame.from_dict(gmx_data)
     df["Run_ID"] = [f"Run {i+1}" for i in range(n_runs)]
     df.set_index("Run_ID", inplace=True)
     print(df.T.describe())
@@ -46,7 +49,8 @@ def gen_df(file, n_runs=3):
     return df
 
 
-data_df = gen_df(snakemake.input[0], n_runs=snakemake.params.n_runs)
+dist_on = bool(getattr(snakemake.params, "dist_on", True))
+data_df = gen_df(snakemake.input[0], n_runs=snakemake.params.n_runs, dist=dist_on)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 5), gridspec_kw=dict(width_ratios=[1, 0.05]))
 
@@ -54,10 +58,18 @@ vmin = int(getattr(snakemake.params, "vmin", 2))
 vmax = int(getattr(snakemake.params, "vmax", 15))
 sns.heatmap(data_df, vmin=vmin, vmax=vmax, cmap="rocket", ax=axes[0], cbar=False)
 
-fig.colorbar(axes[0].collections[0], cax=axes[1])
+label = getattr(snakemake.params, "label", "Distance (Å)")
+fig.colorbar(axes[0].collections[0], cax=axes[1], label=label)
 
-xticks = np.arange(0, 5001, 1000)
-xticklabels = np.arange(0, 101, 20)
+n_frames = data_df.shape[1]
+sim_time = (n_frames * snakemake.config["xtc_step"]) / 1000  # in ns
+
+if sim_time < 500:
+    xticks = np.arange(0, n_frames, (n_frames // 5))
+    xticklabels = np.arange(0, sim_time, (sim_time // 5), dtype=int)
+else:
+    xticks = np.arange(0, n_frames, (n_frames // 10))
+    xticklabels = np.arange(0, sim_time, (sim_time // 10), dtype=int)
 
 axes[0].set_yticklabels(axes[0].get_yticklabels(), rotation=0)
 axes[0].set_title(snakemake.params.title)

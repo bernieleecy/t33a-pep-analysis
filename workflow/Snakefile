@@ -18,6 +18,8 @@ GLUTAMATES = ["E984", "E1061"]
 include: "rules/trajs.smk"
 include: "rules/protein_rms.smk"
 include: "rules/peptide_rms.smk"
+include: "rules/w889_dists.smk"
+include: "rules/n1039_dihs.smk"
 include: "rules/n1039_dists.smk"
 include: "rules/f1038_dists.smk"
 include: "rules/y993_dists.smk"
@@ -33,6 +35,8 @@ for f in FOLDERS:
     if samples.loc[f, "peptide"] == "yes":
         pep_input.append(f"results/{f}/peptide/t33a_pep_backbone_rmsd.png")
         pep_input.append(f"results/{f}/peptide/t33a_pep_backbone_rmsf.png")
+        pep_input.append(f"results/{f}/w889_dists/w889_k9me3_dist_heatmap.png")
+        pep_input.append(f"results/{f}/w889_dists/w889_k9me3_dist_kde.png")
         pep_input.extend(
             [
                 f"results/{f}/vmd_hbonds/data/{p}_hbonds_above_5_{type}.dat"
@@ -79,6 +83,22 @@ for f in FOLDERS:
             f"results/{f}/glutamate_dists/glutamate_violins_clip_10ns.png"
         )
 
+n1039_input = []
+for f in FOLDERS:
+    if not samples.loc[f, "mutations"] == "N1039A":
+        n1039_input.extend(
+            [
+                f"results/{f}/n1039_dihs/N1039_chi{x}_heatmap.png"
+                for x in ["1", "2"]
+            ]
+        )
+        n1039_input.extend(
+            [
+                f"results/{f}/n1039_dihs/N1039_chi{x}_hist.png"
+                for x in ["1", "2"]
+            ]
+        )
+
 
 rule all:
     """
@@ -91,6 +111,7 @@ rule all:
         pep_input,
         k18ac_input,
         r17_input,
+        n1039_input,
         index=expand("runs/{folder}/index.ndx", folder=FOLDERS),
         protein_gro=expand("runs/{folder}/protein_noh2o.gro", folder=FOLDERS),
         fitted_xtc=expand("runs/{folder}/{i}-whole_fit.xtc", folder=FOLDERS, i=IDS),

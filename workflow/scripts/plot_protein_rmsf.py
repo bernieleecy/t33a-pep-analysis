@@ -50,6 +50,11 @@ protein_rmsf_stdev = rmsf_data.iloc[2, 1:-1]
 # resi names automatically obtained, excludes N and C terminal caps
 resi = rmsf_data.columns[1:-1].tolist()
 print(len(resi))
+if resi[0] == 883:
+    print("This is the apo run, exclude first 2 residues")
+    resi = resi[2:]
+    protein_rmsf_avg = protein_rmsf_avg[2:]
+    protein_rmsf_stdev = protein_rmsf_stdev[2:]
 
 fig, ax = plt.subplots(figsize=(8, 4), constrained_layout=True)
 
