@@ -1,6 +1,6 @@
 # Snakemake workflow: t33a-pep-analysis
 
-A Snakemake workflow for analysing T33A—peptide MD simulations, initialised on 11 January 2023 (and is thus under active development).
+A Snakemake workflow for analysing T33A—peptide MD simulations.
 * Currently using snakemake >=7.8, as this reruns code automatically if the parameters, code or input file set has changed – this saves a lot of typing
 
 On my M1 mac, the appropriate conda environment is `snake_env`
